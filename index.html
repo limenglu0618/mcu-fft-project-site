@@ -1,0 +1,280 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MCU-FFT 课设进度管理网站</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="logo" href="#dashboard">MCU-FFT</a>
+      <nav class="topnav" aria-label="主导航">
+        <a href="#dashboard">Dashboard</a>
+        <a href="#overview">Overview</a>
+        <a href="#team">Team</a>
+        <a href="#timeline">Timeline</a>
+        <a href="#tasks">Tasks</a>
+        <a href="#results">Results</a>
+        <a href="#risks">Risks</a>
+        <a href="#checklist">Checklist</a>
+        <a href="#documents">Documents</a>
+        <a href="#tools">Data Tools</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero section" id="dashboard">
+        <div>
+          <p class="eyebrow">数字电路课程设计 · FFT 速率榜</p>
+          <h1>MCU-FFT 速率榜项目管理平台</h1>
+          <p class="hero-copy">
+            项目周期：2026.5.29 - 2026.6.12。目标是在自设计 MCU 上通过指令执行完成 8 点复数 FFT，
+            并在保证输出正确和 WNS 为正的前提下，尽可能降低 <code>cnt_test</code>。
+          </p>
+        </div>
+        <div class="hero-card">
+          <span>当前阶段</span>
+          <strong data-edit="meta.currentStage" contenteditable="true"></strong>
+          <small>点击字段可直接编辑</small>
+        </div>
+      </section>
+
+      <section class="section search-panel">
+        <label class="search">
+          <span>全局搜索</span>
+          <input id="globalSearch" type="search" placeholder="搜索任务、风险、文档、版本说明..." />
+        </label>
+        <button class="btn" id="clearSearch" type="button">清空搜索</button>
+        <div class="search-count" id="searchCount">搜索结果：0</div>
+      </section>
+
+      <section class="section dashboard-grid">
+        <article class="card progress-card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Progress</p>
+              <h2>当前总进度</h2>
+            </div>
+            <strong class="big-number" id="overallProgress">0%</strong>
+          </div>
+          <div id="moduleProgress"></div>
+        </article>
+
+        <article class="card">
+          <p class="eyebrow">Status</p>
+          <h2>当前版本状态</h2>
+          <div class="status-grid" id="statusGrid"></div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <div>
+              <p class="eyebrow">Today</p>
+              <h2>今日任务</h2>
+            </div>
+            <input id="todayDate" type="date" />
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>成员</th><th>今日任务</th><th>状态</th></tr></thead>
+              <tbody id="todayRows"></tbody>
+            </table>
+          </div>
+        </article>
+
+        <article class="card risk-summary">
+          <p class="eyebrow">Current Risks</p>
+          <h2>当前最大风险</h2>
+          <ol id="riskSummary"></ol>
+        </article>
+      </section>
+
+      <section class="section" id="overview">
+        <div class="section-title">
+          <p class="eyebrow">Project Overview</p>
+          <h2>项目总览</h2>
+        </div>
+        <div class="overview-grid">
+          <article class="card">
+            <h3>课设任务</h3>
+            <p>本项目基于自设计 MCU 实现 8 点 FFT 运算。输入数据来自 <code>test_ROM/test_vector_in</code>，输出结果写入 <code>verify_RAM/verify_vector_out</code>，最终以 <code>cnt_test</code> 计数结果衡量处理速度。</p>
+          </article>
+          <article class="card">
+            <h3>设计目标</h3>
+            <ol>
+              <li>正确完成 8 点复数 FFT。</li>
+              <li>输入输出均采用 16 位定点数。</li>
+              <li>使用 MCU 指令完成全部运算。</li>
+              <li>尽可能减少 <code>cnt_test</code>。</li>
+              <li>保证综合后 WNS 为正。</li>
+              <li>完成上板验证和 ILA 观测。</li>
+            </ol>
+          </article>
+        </div>
+        <article class="card">
+          <h3>技术路线图</h3>
+          <div class="flow">
+            <span>test_ROM 输入</span><span>MCU 读取 8 点复数数据</span><span>Q15 定点处理</span>
+            <span>手工展开 8 点 FFT</span><span>MUL / ASR / MULQ15 加速</span><span>写入 verify_RAM</span><span>ILA 观察 cnt_test 与输出</span>
+          </div>
+        </article>
+        <article class="card">
+          <h3>项目核心策略</h3>
+          <p>本组不采用通用 N 点 FFT，而是针对 8 点 FFT 任务规模固定的特点，采用手工展开蝶形结构，减少循环、分支和地址计算开销。同时设计面向定点运算的扩展指令，如 <code>MUL</code>、<code>ASR</code>、<code>MULQ15</code>，以降低旋转因子计算周期。</p>
+        </article>
+      </section>
+
+      <section class="section" id="team">
+        <div class="section-title">
+          <p class="eyebrow">Team Roles</p>
+          <h2>三人分工</h2>
+        </div>
+        <div class="team-grid" id="teamCards"></div>
+      </section>
+
+      <section class="section" id="timeline">
+        <div class="section-title">
+          <p class="eyebrow">Timeline</p>
+          <h2>时间计划</h2>
+        </div>
+        <div id="timelineList"></div>
+      </section>
+
+      <section class="section" id="tasks">
+        <div class="section-title row-title">
+          <div>
+            <p class="eyebrow">Task Board</p>
+            <h2>任务看板</h2>
+          </div>
+          <button class="btn primary" id="addTaskBtn" type="button">新增任务</button>
+        </div>
+        <div class="filters">
+          <label>负责人
+            <select id="filterOwner"><option value="all">全部</option><option>A</option><option>B</option><option>C</option></select>
+          </label>
+          <label>优先级
+            <select id="filterPriority"><option value="all">全部</option><option>高</option><option>中</option><option>低</option></select>
+          </label>
+          <label>状态
+            <select id="filterStatus"><option value="all">全部</option><option>待开始</option><option>进行中</option><option>待测试</option><option>已完成</option><option>有问题</option></select>
+          </label>
+        </div>
+        <div class="kanban" id="kanban"></div>
+      </section>
+
+      <section class="section" id="results">
+        <div class="section-title row-title">
+          <div>
+            <p class="eyebrow">Results</p>
+            <h2>版本与测试结果</h2>
+          </div>
+          <div class="fastest" id="fastestVersion">当前最快：待测</div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>版本表</h3><button class="btn" id="addVersionBtn" type="button">新增版本</button></div>
+          <div class="table-wrap"><table><thead><tr><th>版本</th><th>日期</th><th>改动</th><th>是否通过</th><th>cnt_test</th><th>LUT</th><th>FF</th><th>WNS</th><th>操作</th></tr></thead><tbody id="versionTable"></tbody></table></div>
+        </div>
+        <div class="card">
+          <h3>测试通过率</h3>
+          <div class="table-wrap"><table><thead><tr><th>测试类型</th><th>组数</th><th>通过数</th><th>状态</th><th>通过率</th></tr></thead><tbody id="testTable"></tbody></table></div>
+        </div>
+      </section>
+
+      <section class="section" id="risks">
+        <div class="section-title row-title">
+          <div>
+            <p class="eyebrow">Risks</p>
+            <h2>当前风险</h2>
+          </div>
+          <button class="btn primary" id="addRiskBtn" type="button">新增风险</button>
+        </div>
+        <div class="risk-grid" id="riskCards"></div>
+      </section>
+
+      <section class="section" id="checklist">
+        <div class="section-title row-title">
+          <div>
+            <p class="eyebrow">Daily Checklist</p>
+            <h2>每日检查清单</h2>
+          </div>
+          <label class="date-label">日期 <input id="checkDate" type="date" /></label>
+        </div>
+        <div class="card">
+          <div id="checklistItems" class="checklist"></div>
+          <div class="inline-form">
+            <input id="newCheckText" placeholder="新增检查项" />
+            <button class="btn" id="addCheckBtn" type="button">添加</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="documents">
+        <div class="section-title">
+          <p class="eyebrow">Documents</p>
+          <h2>资料文档区</h2>
+        </div>
+        <div class="docs-grid" id="docsGrid"></div>
+      </section>
+
+      <section class="section" id="tools">
+        <div class="section-title">
+          <p class="eyebrow">Data Tools</p>
+          <h2>数据工具区</h2>
+        </div>
+        <div class="tool-row card">
+          <button class="btn primary" id="exportBtn" type="button">导出 JSON</button>
+          <label class="btn file-btn">导入 JSON <input id="importFile" type="file" accept="application/json" /></label>
+          <button class="btn danger" id="resetBtn" type="button">重置默认数据</button>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="taskDialog">
+      <form method="dialog" id="taskForm" class="dialog-form">
+        <h3 id="taskDialogTitle">任务</h3>
+        <input type="hidden" id="taskId" />
+        <label>任务名称<input id="taskTitle" required /></label>
+        <label>负责人<input id="taskOwner" placeholder="A / B / C / A+B" required /></label>
+        <label>截止日期<input id="taskDue" placeholder="6.6" required /></label>
+        <label>优先级<select id="taskPriority"><option>高</option><option>中</option><option>低</option></select></label>
+        <label>状态<select id="taskStatus"><option>待开始</option><option>进行中</option><option>待测试</option><option>已完成</option><option>有问题</option></select></label>
+        <label>验收标准<textarea id="taskAcceptance" rows="4" placeholder="每行一条"></textarea></label>
+        <label>备注<textarea id="taskNote" rows="3"></textarea></label>
+        <div class="dialog-actions">
+          <button class="btn" value="cancel" type="button" id="cancelTask">取消</button>
+          <button class="btn primary" value="default" type="submit">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="riskDialog">
+      <form method="dialog" id="riskForm" class="dialog-form">
+        <h3>风险</h3>
+        <input type="hidden" id="riskId" />
+        <label>风险内容<input id="riskText" required /></label>
+        <label>风险等级<select id="riskLevel"><option>高风险</option><option>中风险</option><option>低风险</option></select></label>
+        <div class="dialog-actions">
+          <button class="btn" value="cancel" type="button" id="cancelRisk">取消</button>
+          <button class="btn primary" value="default" type="submit">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="docDialog">
+      <form method="dialog" id="docForm" class="dialog-form">
+        <h3>新增文档</h3>
+        <input type="hidden" id="docCategory" />
+        <label>文档名称<input id="docName" required /></label>
+        <label>链接<input id="docLink" placeholder="可留空" /></label>
+        <div class="dialog-actions">
+          <button class="btn" value="cancel" type="button" id="cancelDoc">取消</button>
+          <button class="btn primary" value="default" type="submit">保存</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast" id="toast">已自动保存</div>
+    <script src="app.js"></script>
+  </body>
+</html>
